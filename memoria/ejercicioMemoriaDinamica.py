@@ -12,10 +12,17 @@ class Alumno:
         self.apellido_paterno = apellido_paterno
         self.apellido_materno = apellido_materno
         self.fecha_nacimiento = fecha_nacimiento
+        self.curp = self.generar_curp()
+
+    def generar_curp(self):
+        curp_generada = (self.apellido_paterno[:2] + self.apellido_materno[:1] + self.nombre[:1] +
+                         self.fecha_nacimiento[-2:] + self.fecha_nacimiento[3:5] + self.fecha_nacimiento[:2]).upper()
+        return curp_generada
 
     def mostrar_datos(self):
         print(f"Nombre: {self.nombre} {self.apellido_paterno} {self.apellido_materno}")
-        print(f"Fecha de Nacimiento: {self.fecha_nacimiento}\n")
+        print(f"Fecha de Nacimiento: {self.fecha_nacimiento}")
+        print(f"CURP: {self.curp}\n")
 
 
 def main():
