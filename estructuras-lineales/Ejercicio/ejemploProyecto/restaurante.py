@@ -88,6 +88,8 @@ class RestauranteApp(tk.Tk):
     def create_empleados_widgets(self):
 
         # Pestaña Empleados
+
+
         # Crear un Frame para los widgets de empleados
         frame_empleados = ttk.LabelFrame(self.tabEmpleados, text="Gestión de Empleados")
         frame_empleados.pack(padx=10, pady=10, fill="both", expand=True)
@@ -106,6 +108,19 @@ class RestauranteApp(tk.Tk):
         self.listbox_empleados = tk.Listbox(frame_empleados)
         self.listbox_empleados.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
 
+        btn_editar = tk.Button(frame_empleados, text="Editar Empleado", command=self.editar_empleados)
+        btn_editar.grid(row=3, 
+                        column=0, 
+                        columnspan=2,
+                        padx=5, pady=5)
+        
+        btn_eliminar = tk.Button(frame_empleados,
+                                 text="eliminar empleado",
+                                 command=self.eliminar_empleado
+                                 )
+        
+        btn_eliminar.grid(row=3, column=3, columnspan=2, padx=5, pady=5)
+
     def agregar_empleado(self):
         # Obtener el nombre del empleado ingresado en la entrada
         nombre_empleado = self.entry_nombre.get()
@@ -119,7 +134,7 @@ class RestauranteApp(tk.Tk):
             self.lista_empleados.agregar_al_principio(nombre_empleado)
 
             #Actualizar listbox
-            self.actualizar_empleados()
+            self.actualizar_lista_empleados()
 
             # Actualizar la visualización de la lista de empleados
             #self.lista_empleados.actualizar_lista_empleados()
@@ -135,14 +150,94 @@ class RestauranteApp(tk.Tk):
             # Mostrar un mensaje de error si no se ingresó un nombre
             messagebox.showerror("Error", "Por favor ingresa el nombre del empleado.")
 
-    def actualizar_empleados(self):
+    def actualizar_lista_empleados(self):
         #limpiar el contenido de listbox
         self.listbox_empleados.delete(0,tk.END)
 
         #obtener lista de empleados al momento
         empleados = self.lista_empleados.obtener_lista()
+        
         for empleado in empleados:
             self.listbox_empleados.insert(tk.END, empleado)
+
+    def editar_empleados(self):
+        #se necesita obtener el indice del empleado
+
+        seleccionado = self.listbox_empleados.curselection()
+
+        if seleccionado:
+
+            indice = seleccionado[0]
+
+            #obtener valor del empleado de la lista 
+            empleado_seleccionado = self.listbox_empleados.get(indice)
+
+            #crear una ventana emergente para editar 
+
+            ventana_edicion = tk.Toplevel(self)
+            ventana_edicion.title("Editar Empleados")
+
+            #entrada para sustituir valor
+            lbl_nuevo_valor = tk.Label(ventana_edicion, text = "Nuevo valor: ")
+            lbl_nuevo_valor.grid(row=0, column=0, padx=5, pady=5)
+
+
+            entry_nuevo_valor = tk.Entry(ventana_edicion)
+            entry_nuevo_valor.grid(row=0, column=1, padx=5, pady=5)
+
+
+            #Boton para guardar cambios 
+            btn_Confirmar = tk.Button(ventana_edicion, text="Guardar Cambios",
+                                       command= lambda: self.confirmar_edicion(indice, entry_nuevo_valor.get(), ventana_edicion))
+            
+            btn_Confirmar.grid(row=1, column=0, columnspan=2)
+
+        else:
+            #mostrar un mensaje de error si no se selecciono un elemento de la lista
+            messagebox.showerror("Error", "Debe seleccionar un empleado")
+
+    def confirmar_edicion(self, indice, nuevo_valor, ventana_edicion):
+    #Actulizar el valor seleccionado
+
+        empleados = self.lista_empleados.obtener_lista()
+        empleados[indice] = nuevo_valor.upper()
+
+        self.lista_empleados = ListaEnlazada()
+        for empleado in empleados:
+         self.lista_empleados.agregar_al_principio(empleado)
+
+    #Actualizar vista de empleados
+         self.actualizar_lista_empleados()
+
+    #Una vez realizado este proceso se debe cerrar la ventana
+        ventana_edicion.destroy()
+
+    def eliminar_empleado(self):
+        seleccionado = self.listbox_empleados.curselection()
+
+        if seleccionado:
+            indice = seleccionado[0]
+            empleado_borrar = self.listbox_empleados.get(indice)
+
+            respuesta = messagebox.askyesno(
+
+                "confirmar eliminacion", 
+                f"¿Estas seguro de eliminar este elemento? \n {empleado_borrar}"
+            )
+
+            if respuesta:
+                #en este caso se elimina el registro 
+                empleados = self.lista_empleados.obtener_lista()
+                del empleados[indice]
+
+                self.lista_empleados = ListaEnlazada
+
+                for empleado in empleados:
+                    self.lista_empleados.agregar_al_principio(empleado)
+                
+                self.actualizar_lista_empleados()
+
+
 
     def create_turnos_widgets(self):
         # Aquí crearías los widgets para la pestaña de turnos
