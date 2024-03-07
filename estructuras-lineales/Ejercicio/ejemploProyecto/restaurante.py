@@ -48,6 +48,29 @@ class ListaEnlazada():
             actual = actual.siguiente
         return lista
 
+class ColaCircular():
+    def __init__(self):
+        self.items= []
+    
+    def esta_vacia(self):
+        return self.items.insert(0, items)
+    
+    def encolar(self, item):
+        self.items.insert(0, item)
+
+    def desencolar(self):
+        if not self.esta_vacia():
+            return self.items.pop()
+        else:
+            return None
+    
+    def ver_primero(self):
+        return self.items[-1]
+    
+    def avanzar_turno(self):
+        if not self.esta_vacia():
+            self.items.append(self.items.pop(0))
+
 class RestauranteApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -75,6 +98,9 @@ class RestauranteApp(tk.Tk):
 
         # Definir la lista enlazada de empleados
         self.lista_empleados = ListaEnlazada()
+
+        #definir la cola circular de turnos 
+        self.cola_turnos = ColaCircular()
 
         # Llamar metodos para definir Pestañas
         self.create_empleados_widgets()
@@ -241,7 +267,51 @@ class RestauranteApp(tk.Tk):
 
     def create_turnos_widgets(self):
         # Aquí crearías los widgets para la pestaña de turnos
-        pass
+        frame_turnos = ttk.Frame(self.tabTurnos)
+        frame_turnos.pack(fill="both", expand=True)
+
+        lbl_turno = tk.Label(frame_turnos, text="Turno:")
+        lbl_turno.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.entry_turno = tk.Entry(frame_turnos)
+        self.entry_turno.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+
+        btn_asignar_turno = tk.Button(frame_turnos,
+                                      text="Asignar Turno",
+                                      command=self.asignar_turno)
+        btn_asignar_turno.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+
+        btn_avanzar_turno = tk.Button(frame_turnos, text="Avanzar Turno",
+                                      command=self.avanzar_turno)
+        btn_avanzar_turno.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+
+        self.listbox_turnos = tk.Listbox(frame_turnos)
+        self.listbox_turnos.grid(row=3, column=0, columnspan=2,
+                                 padx=5, pady=5, sticky="nsew")
+    
+    def asignar_turno(self):
+        turno = self.entry_turno.get()
+        if turno:
+            empleado = self.lista_empleados.obtener_lista().pop(0)
+            self.cola_turnos.encolar((empleado, turno))
+            self.actualizar_lista_turnos()
+            self.entry_turno.delete(0, tk.END)
+            messagebox.showinfo("Informacion",
+                                f"Turno {turno} asignado a {empleado}")
+        else:
+            messagebox.showerror("Error", "por favor ingresa el turno")
+
+    def avanzar_turno(self):
+        if not self.cola_turnos.esta_vacia():
+            empleado_turno = self.cola_turnos.desencolar()
+            self.cola_turnos.avanzar_turno()
+            self.actualizar_lista_turnos()
+            messagebox.showinfo("Informacion", f"Avanzado al siguiente turno: {turno}.")
+
+    def actualizar_lista_turnos(self): 
+        self.listbox_turnos.delete(0, tk.END)
+        turnos = [f"{empleado}: {turno}" for empleado, turno in self.cola_turnos.items]
+        for turno in turnos:
+            self.listbox_turnos.insert(tk.END, turno)
 
     def create_ordenes_widgets(self):
         # Aquí crearías los widgets para la pestaña de órdenes
